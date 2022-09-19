@@ -26,14 +26,7 @@ export default class Game extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
     }
 
-    create() {
-        this.scene.run(SceneKey.UI)
-
-        spriteSheetAnims(this.anims);
-        atlasAnims(this.anims);
-
-        const m = this.make.tilemap({ key: 'map' });
-
+    createTiles(m: Phaser.Tilemaps.Tilemap) {
         const tileSets = Preloader.tileSetDescriptors.map(
             x => m.addTilesetImage(x.name, x.key));
 
@@ -41,12 +34,10 @@ export default class Game extends Phaser.Scene {
             Object.entries(TerrainLayers).map(([f,s], _) => m.createLayer(s, tileSets), null);
 
         tiles.forEach((val, _) => val.setCollisionByProperty({ collides: true }));
+        return tiles;
+    }
 
-        const chests = this.physics.add.staticGroup({ classType: Chest });
-        const chestsLayer = m.getObjectLayer(ObjectLayers.ChestLayer);
-        chestsLayer.objects.forEach(c =>
-            chests.get(c.x, c.y, TextureKey.Treasure));
-
+    createFlames(m: Phaser.Tilemaps.Tilemap) {
         const flames = this.physics.add.group({
             classType: Flame,
             enable: false,
@@ -66,6 +57,24 @@ export default class Game extends Phaser.Scene {
                 this.physics.world.enable(flame);
             }
         });
+        return flames;
+    }
+
+    createChests(m: Phaser.Tilemaps.Tilemap) {
+        const chests = this.physics.add.staticGroup({ classType: Chest });
+        const chestsLayer = m.getObjectLayer(ObjectLayers.ChestLayer);
+        chestsLayer.objects.forEach(c =>
+            chests.get(c.x, c.y, TextureKey.Treasure));
+        return chests;
+    }
+
+    create() {
+        this.scene.run(SceneKey.UI)
+
+        spriteSheetAnims(this.anims);
+        atlasAnims(this.anims);
+
+        const m = this.make.tilemap({ key: 'map' });
 
         const knives = this.physics.add.group({
             classType: Phaser.Physics.Arcade.Image,
@@ -73,6 +82,10 @@ export default class Game extends Phaser.Scene {
             active: false,
             maxSize: 3
         })
+
+        const tiles = this.createTiles(m);
+        const flames = this.createFlames(m);
+        const chests = this.createChests(m);
 
         this.hero = this.add.hero(188, 128, TextureKey.HeroIdle).setKnives(knives);
 

@@ -1,7 +1,6 @@
 import Phaser from "phaser";
 import Events from "~/constants/events";
 import { TextureKey } from "~/constants/textures";
-import Flame from "~/enemies/Flame";
 import { sceneEvents } from "~/events";
 import Chest from "~/items/Chest";
 import { isMovement } from "~/utils/cursors";
@@ -146,7 +145,7 @@ export default class Hero extends Phaser.Physics.Arcade.Sprite {
         this._health--;
 
         if (this._health <= 0) {
-            this.healthState = HealthState.DEAD;
+            this.healthState = HealthState.DEAD
             this.anims.play(Animation.HF);
             this.setVelocity(0, 0);
         } else {
